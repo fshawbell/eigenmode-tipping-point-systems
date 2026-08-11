@@ -1,1 +1,3 @@
 # eigenmode-tipping-point-systems
+
+This repository contains the MATLAB code and Latex writeup for a working-paper based on the results of the master's thesis of Felix Shaw-Bell. A special thanks is owed to Prof. Graham Donovan for his supervision and support. The MATLAB code is found in /src and /scripts and the Latex writeup is found in /writeup.
