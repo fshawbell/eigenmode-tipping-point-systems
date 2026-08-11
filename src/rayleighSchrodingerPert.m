@@ -27,7 +27,7 @@ function [A,lambda] = rayleighSchrodingerPert(G,l0,M)
             A(:,:,m) = (-A(:,:,m-1)*G  + extraTerms) ./ denom;
         end
         
-        % Set diagonal to 0
+        % Set diagonal to 0 
         Am = A(:,:,m);     
         Am(eye(N) == 1) = 0; 
         A(:,:,m) = Am;
