@@ -8,6 +8,8 @@
         "**/*.blg": true,
         "**/*.synctex.gz": true,
         "**/*.toc": true,
-        "**/*.out": true
+        "**/*.out": true,
+        "**/*.bcf": true,
+        "**/*.run.xml": true
     }
 }

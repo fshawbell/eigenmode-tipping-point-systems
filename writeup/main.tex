@@ -8,6 +8,9 @@
 \usepackage[backend=biber,style=numeric]{biblatex} 
 \usepackage{hyperref}
 \usepackage{cleveref}
+\usepackage{amsaddr}
+
+\newcommand{\rev}[1]{\textcolor{red}{[#1]}}
 
 \addbibresource{refs.bib}
 
@@ -20,11 +23,461 @@
 
 \begin{document}
   \begin{abstract}
-    Abstract goes here.
+    Tipping point systems are characterised by large, abrupt, persistent departures from some stable state, often following some relatively small change in one or more underlying parameter(s). A simple model for such systems is a one dimensional stochastic differential equation (SDE) which undergoes a loss of stability (bifurcation) in the deterministic dynamics. The Fokker-Planck equation (FPE) describes the temporal evolution of the probability density function (PDF) of such an SDE. An existing method used to approximate the FPE is an eigenmode approximation, whereby the evolution of a PDF governed by the FPE is approximated with the eigenvalues and eigenfunction of the Fokker-Planck operator (FPO). The eigenvalues and eigenfunctions of the FPO are not generally available in closed form and typically require approximations. This paper compares the boundary condition perturbation method (BCPM) with the Rayleigh-Schrödinger perturbation method (RSPM) as method for approximating the eigenvalues and eigenfunctions of the FPO. Each method offers accurate approximations in different settings, with the BCPM performing best in low noise settings, and the RSPM performing best in high noise settings.
   \end{abstract}
   \maketitle
   \section{Introduction}
-  \section{Setup and Preliminaries}
+  \label{sec:introduction}
+
+Systems that undergo a large, abrupt, persistent departure from some stable state, often following some relatively small change in one or more underlying parameter(s), are called \emph{tipping point systems}. An event in which such a change in state takes place is called a \emph{tipping event} (also called a \emph{critical transition}). There are several climatic and ecological systems that show (or are theorised to show) tipping phenomena. It is often the case that these abrupt changes in state are catastrophic, with negative consequences. 
+
+A relevant example of a tipping point system is the Atlantic Meridional Overturning Circulation (AMOC). AMOC is an important climatic system which transports warm water from the tropical Atlantic towards Northern Europe and returns cold arctic water towards the equator \cite{rahmstorf_2024_AMOC}. A change in the input of fresh water in the Northern Atlantic (amongst over parameters) is theorised to have the ability to collapse AMOC and potentially cause large, abrupt changes in the climates of not just Northern Europe, but much of the globe \cite{vellinga_2002_global_climatic_impacts_of_AMOC}. Palaeoclimatic data suggests that repeated climatic tipping events, potentially caused by past collapses of AMOC, have occurred in the North Atlantic over the past 120,000 years \cite{broecker_1987_unpleasant_surprises_in_the_greenhouse,rahmstorf_2002_ocean_circulation_past_120000_years}. Research published in 2024 suggests that AMOC is presently `on route to tipping' \cite{van_western_2024_physics_based_EWS_AMOC}.
+
+There are several ecological systems that display tipping phenomena. Notable examples include, abrupt transitions between savanna and forest \cite{staver_2011_savanna_forest_biome_states}, collapse of over exploited fisheries \cite{beddington_1977_harvesting_natural_populations} and abrupt transitions in lakes between a vegetation dominated state to an algal dominated state \cite{scheffer_1993_alternative_lake_equilibria}. Table 1 of \cite{dakos_2019_ecosystem_tipping_points} provides a summary of ecological tipping systems along with potential evolutionary responses.
+
+Given the significant potential impacts of real-world tipping point systems, the ability to model, and thus predict, where and when a tipping event might occur is of great importance. In the case of stochastic systems, the additional question of tipping probability must be considered. 
+
+Consider a one-dimensional, time dependant state variable $X(t)$, the evolution of which is governed by the following stochastic differential equation (SDE),
+\begin{equation}
+    \label{eq:1d_system_setup}
+    dX = f(X,\mu(t))\,dt + \sigma \,dW,
+\end{equation}
+where $f$ is some function providing deterministic dynamics (also called the \emph{drift} or \emph{drift function}), $W(t)$ is the standard Wiener process providing random additive noise (also called \emph{diffusion}) and $\sigma$ is the standard deviation of the noise. $f$ is dependent on some underlying time-dependent parameter $\mu(t)$ (also called the \emph{bifurcation parameter} in the case that $\mu$ causes a bifurcation, as will be the case in this thesis). We assume that there exists a region(s) for which $f$ produces a \emph{basin of attraction}. A basin of attraction is some region about a stable equilibrium (equilibrium of the drift function) $x^*(t)$, for which $X$ is attracted towards $x^*$ by the drift function $f$. More precisely, let $x^*$ be defined by the following properties, $f(x^*,\mu)=0$ (equilibrium point) and $f_x(x^*,\mu)<0$ (stability), where $f_x = \frac{\partial f}{\partial x}$. As such, $x^*(t)$ may evolve over time as $f$ evolves, and may even cease to exist following a bifurcation of $f$. In the context of this model, we consider a tipping event to be a large, abrupt and persistent departure of the state variable $X$ from the stable equilibrium $x^*$ (or from where the stable equilibrium used to be, in the case of a bifurcation).
+
+Following the classification by Ashwin et al. \cite{ashwin_2012_tipping_points}, three categories of \emph{tipping effects} can be considered for the model described by \cref{eq:1d_system_setup} (see \cref{fig:tippingTypesExamples} for an illustrative example of each tipping effect): 
+\begin{enumerate}
+    \item \emph{B-tipping} in which changes in $\mu$ produce a bifurcation the in drift function $f$, resulting in the loss of stability of the basin of attraction.
+    \item \emph{N-tipping} in which a noisy excursion produced by $W$ is large enough to cause $X$ to exit the basin of attraction (that is, an excursion that passes over an unstable equilibrium).
+    \item \emph{R-tipping} in which changes in $\mu$ shift the location of the basin of attraction at a rate which is faster than $X$ can adapt, causing $X$ to exit the basin of attraction.
+\end{enumerate}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics{figures/tippingTypesExamples.pdf}
+    \caption[Examples of types of tipping effects.]{Examples of (a) B-tipping, (b) N-tipping and (c) R-tipping. In each case we observe an abrupt change in the state variable $X$ following either changes in the existence/location of the stable equilibrium $x^*$ and unstable equilibrium $x^{**}$ of $f$, or due to a large noisy excursion. The changes in equilibrium can be attributed to the effects of a time-dependent underlying parameter $\mu(t)$ on $f(X,\mu)$.}
+    \label{fig:tippingTypesExamples}
+\end{figure}
+
+In the case of purely deterministic systems (that is, $\sigma = 0$ in \cref{eq:1d_system_setup}), B-tipping can be studied using classical bifurcation analysis. Purely deterministic R-tipping can often be studied with a moving frame of reference. In the case of a linear shift of the drift function (as shown in \cref{fig:tippingTypesExamples}c), tipping points can be computed analytically, while non-linear shifts require more advanced techniques and approximations \cite{ashwin_2012_tipping_points}. The case of N-tipping requires probabilistic methods to be utilised. In addition, many tipping point systems display more than one tipping effect acting at once. For example a noisy system ($\sigma>0$) may approach a bifurcation, causing the basin of attraction to weaken, increasing the probability of N-tipping (potentially never actually undergoing a bifurcation). A similar effect may occur in noisy systems showing increasing rate of parameter change (see \cite{ritchie_sieber_2017_noise_rate_tipping} for an example of N-tipping and R-tipping dynamics operating in tandem).
+
+In this thesis we consider noisy systems approaching a bifurcation of the drift function, that is, both N-tipping and B-tipping effects. See \cref{fig:tippingTypesExampleWithFPEsolution} for an example of such a system. In such a case, classical bifurcation analysis is not sufficient to describe the tipping dynamics at hand. Instead, the probabilistic behaviour of the system must be quantified. Ideally, the complete probability density function (PDF) of the state variable can be found. The time evolution of the PDF $p(x,t)$ of the state variable $X(t)$, as defined by \cref{eq:1d_system_setup}, can be described by the \emph{Fokker-Planck equation} (FPE) as such \cite{risken_frank_1992_fokker_planck_equation},
+\begin{equation}
+    \label{eq:intro FPE}
+    \frac{\partial p}{\partial t} = D\frac{\partial^2 p}{\partial x^2} - \frac{\partial}{\partial x}\left [ f p\right],
+\end{equation}
+where $D=\frac{\sigma^2}{2}$. We call $D$ the \emph{diffusion constant}. Note that $X(t)$ is a time-dependent random process whereas $x$ is an independent spatial variable. It is often not possible to find solutions to the FPE in an analytic manner. As a result, approximations or simplifying assumptions must be developed. However, despite the importance of such solutions in the application of tipping point systems, general (non-numerical) methods that are effective over a wide range of system parameters are still not fully developed. This thesis aims to expand upon existing methods and apply new complementary methods to tipping point problems in an effort to better answer the question: 
+
+\begin{center}
+\emph{With what probability might a tipping point system of interest undergo a tipping event and how does this probability vary with time and choice of system parameters?}
+\end{center}
+
+Specifically we wish to answer this question for a one-dimensional SDE with a time-dependent bifurcation parameter, as described by \cref{eq:1d_system_setup}. This thesis tackles the problem statement by utilising an \emph{eigenmode approximation} of the PDF. The eigenvalues and eigenfunctions used in the eigenmode approximation are approximated by two perturbation methods, the \emph{boundary condition perturbation method} (BCPM) and the \emph{Rayleigh-Schrödinger perturbation method} (RSPM). The BCPM has already been applied to tipping point systems by Ritchie and Sieber \cite{ritchie_2016_early_warning,ritchie_sieber_2017_noise_rate_tipping} for a certain class of drift functions in low noise settings. This thesis expands upon to the method to allow symmetric confining drift functions and symmetric anti-confining drift functions to be approximated under such a method. We also apply the RSPM to provide an alternative approximation method which performs well in high noise settings (for which the BCPM does not perform well).
+
+\begin{figure}[h]
+    \centering
+      \includegraphics{figures/tippingExamplePlusFPEsolution.pdf}
+    \caption[Example of system with both B-tipping and N-tipping effects.]{(a) A realisation $X$ of a system with both B-tipping and N-tipping effects, including the locations of the stable equilibrium $x^*$ and unstable equilibrium $x^{**}$, and (b) a numerically computed solution $p$ to the corresponding FPE.}
+    \label{fig:tippingTypesExampleWithFPEsolution}
+\end{figure}
+
+The article begins...
+
+\section{Approximation methods}
+\subsection{Boundary condition perturbation method}
+\label{sec:boundary condition perturbation}
+
+In this section we take inspiration and expand upon the \emph{boundary condition} (BC) \emph{perturbation method} presented by Ritchie and Sieber \cite{ritchie_2016_early_warning,ritchie_sieber_2017_noise_rate_tipping}. The method provides an approximation for the leading non-zero eigenvalue and the corresponding eigenfunction of the FPO for certain potential functions. As mentioned previously (see \cref{eq:invariant solution}), an invariant solution to the FPO can typically be computed analytically. If this invariant solution satisfies the boundary conditions of the system, then it is an eigenfunction corresponding to the zero eigenvalue. In contrast, apart from the cases mentioned in \cref{sec:spectra of solvable potentials}, it is very rare to find analytic solutions to the non-zero eigenvalues and the corresponding eigenfunctions. The BCPM utilises the fact that the leading non-zero eigenvalue is very close to zero for systems with a strong basin of attraction. Following a relaxation of the boundary condition, an analytic solution to the eigenvalue problem can be computed for the zero eigenvalue. The boundary condition is then corrected using a linear perturbation, yielding an approximation of the leading non-zero eigenvalue and the corresponding eigenfunction. The leading non-zero eigenvalue is of particular interest to the study of tipping point systems as it corresponds to tipping rates, for example see \cref{eq:bistable escape rates,eq:symmetric escape rate in terms of eig}.
+
+The BCPM was originally presented by Ritchie and Sieber \cite{ritchie_2016_early_warning,ritchie_sieber_2017_noise_rate_tipping} for asymmetric potential functions $U$ with the property $U(x)\to \pm\infty$ as $x \to \infty$ and $U(x)\to \mp\infty$ as $x \to -\infty$. That is, a potential function that approaches $\infty$ at one boundary and approaches $-\infty$ at the opposite boundary. The method then restricts the domain to a sufficiently large domain $[a,b]$. The method also requires a basin of attraction within the potential function from which tipping might occur (see \cref{fig:BCpertExampleAsym}a for an example of such a potential function). Ritchie and Sieber originally used a perturbation of the boundary condition itself and then found the relationship between the boundary condition and the eigenvalue to approximate the leading non-zero eigenvalue. In this thesis, we instead directly observe the effect of changes in the eigenvalue (i.e. the eigenvalue is treated as a perturbation parameter). Although the implementation of the BCPM in this thesis appears different to the original work by Ritchie and Sieber, it follows exactly the same principles and thought process. Furthermore, Ritchie and Sieber applied the BCPM with with two absorbing boundary conditions. We also allow for one absorbing boundary condition and one homogeneous Neumann condition. This allows us to extend the method to apply to even potential functions with the form $U(x)\to \infty$ as $|x| \to \infty$, and the form $U(x)\to -\infty$ as $|x| \to \infty$ (i.e even confining potential functions and even anti-confining potential functions). 
+
+\subsubsection*{Unperturbed solution with free boundary condition}
+Without loss of generality, let us look at the case of a FPO with an absorbing boundary condition on the left and a undefined boundary condition on the right. We assume that the potential function contains a basin of attraction and that the boundary conditions have been selected in a manner appropriate to the potential function (see \cref{fig:potentials with boundary conditions}). In this case the absorbing boundary condition on the left is appropriate if $U(x) \to -\infty$ as $x\to-\infty$. The (normalised) eigenvalue problem for the zero eigenvalue for such a system on the domain $x\in[a,b]$ is given as
+\begin{equation}
+\label{eq:eigenfunction one BC}
+\left\{
+\begin{aligned}
+\mathcal{L}_{F}\, \psi &= 0 , \qquad x \in [a, b], \\
+\psi(a) &= 0, \\
+\int_a^b\psi \, dx &= 1.
+\end{aligned}
+\right.
+\end{equation}
+
+% \begin{equation}
+% \label{eq:eigenfunction both BCs}
+% \left\{
+% \begin{aligned}
+% \mathcal{L} \psi &= \lambda \psi , \qquad x \in [a, b], \\
+% \psi(a) &= 0, \\
+% \psi(b) &= 0, \\
+% \|\psi\| &= 1.
+% \end{aligned}
+% \right.
+% \end{equation}
+
+% As mentioned, \cref{eq:eigenfunction both BCs} rarely has an analytical solution. Notably, by \rev{cite}, there is no zero eigenvalue solution to \cref{eq:eigenfunction both BCs} due to the boundary conditions. Relaxing the right-hand boundary condition of \cref{eq:eigenfunction both BCs} and setting $\lambda=0$ gives us the following system to solve,
+
+ \Cref{eq:eigenfunction one BC} is simpler to solve than a system with and two boundary conditions and non-zero eigenvalue (for which an analytical solution is seldom available), and thus allows an analytical solution of $\psi$ to be found. We call this solution $p^{(0)}$. Solving \cref{eq:eigenfunction one BC} gives,
+\begin{equation}
+    \label{eq:unperturbed BC method p0}
+    p^{(0)}(x) = c_0\int_{a}^{x} \exp\left(\frac{U(s)-U(x)}{D}\right) ds,
+\end{equation}
+where the constant $c_0$ is given by,
+\begin{equation*}
+    c_0=\left(\int_{a}^{b}\int_{a}^{s_2} \exp\left(\frac{U(s_1)-U(s_2)}{D}\right)ds_1 ds_2\right)^{-1}.
+\end{equation*}
+
+We can interpret the solution \cref{eq:unperturbed BC method p0} as a steady state distribution which is achieved by allowing a non-zero probability flux at $x=b$, which then flows towards the absorbing boundary condition at $x=a$. In the following subsections we `correct' the initially undefined boundary condition from solution $p^{(0)}$ to be either an absorbing boundary condition or a homogeneous Neumann boundary condition. In both cases, the initial solution $p^{(0)}$ should act in a `similar' manner at $x=a$ to our final desired boundary condition to avoid errors resulting from large perturbations. As a result, we require the following conditions to be met in order for an accurate approximation,
+\begin{enumerate}
+    \item There is a relatively large potential well in the domain $x\in [a,b]$ with stable equilibrium at $x^*$. This criteria ensures that the true eigenvalue is also close to zero, therefore avoiding large errors from our assumption used to compute \cref{eq:unperturbed BC method p0}.
+    \item The probability flux entering at $x=b$ has a larger potential than at $x=a$ and at least as large as $x=x^*$, that is, $U(b)>U(a)$ and $U(b)\geq U(x^*)$. This ensures that a `natural' flow of probability flux occurs from $x=b$ to $x=a$ (very informally, when thinking of a potential function, probability flux naturally flows `downhill'), resulting in the initially undefined boundary condition at $x=b$ to be `similar' to an absorbing boundary condition or a homogeneous Neumann boundary condition.
+\end{enumerate}
+
+\subsubsection*{Perturbation of boundary condition}
+Let us now resolve the undefined right boundary condition provided by the solution $p^{(0)}$ by linear perturbation. By perturbing the $p^{(0)}$ while maintaining the boundary condition of $\psi(a) = 0$ we can find an approximated solution which satisfies two boundary conditions.
+
+The linear perturbed solution $p_{\hat{\lambda}}$ is controlled by the parameter $\hat{\lambda}$, which has a similar role as an eigenvalue $\lambda$. $p_{\hat{\lambda}}$ is a perturbation about $\hat{\lambda}=0$, representing the fact that \cref{eq:eigenfunction one BC} was solved for $\lambda=0$ and we wish to perturb away from this solution. The single boundary condition and normalisation condition found in \cref{eq:eigenfunction one BC} are carried through to $p_{\hat{\lambda}}$. We call the first-order correction in the linear perturbation $p^{(1)}$ and define the perturbed solution $p_{\hat{\lambda}}$ as such,
+\begin{equation}
+\label{eq:linear pertubation definition}
+    \left\{
+\begin{aligned}
+    p_{\hat{\lambda}}(x) & = p^{(0)}(x) + \hat{\lambda} \,p^{(1)}(x),\\
+        p_{\hat{\lambda}}(a)&=0,\\
+    \int_a^b p_{\hat{\lambda}}\,dx&=1.
+\end{aligned}
+    \right.
+\end{equation}
+From \cref{eq:linear pertubation definition} it immediately follows that the conditions for $p^{(1)}$ are,
+\begin{equation}
+    \label{eq:BCs p1 linearisation}
+    \left\{
+\begin{aligned}
+        p^{(1)}(a)&=0,\\
+    \int_a^bp^{(1)}\,dx&=0.
+\end{aligned}
+    \right.
+\end{equation}
+We can interpret \cref{eq:BCs p1 linearisation} as requiring that the perturbed function $p_{\hat{\lambda}}$ maintain the absorbing boundary condition on the left and that no `mass' is gained or lost. $p^{(1)}$ is defined implicitly by the eigenvalue problem for eigenvalue $\hat{\lambda}$ and eigenfunction $p_{\hat{\lambda}}$ about $\hat{\lambda}=0$. Informally, we can think of the first-order correction $p^{(1)}$ as the `direction' the solution of the eigenvalue problem is pushed as $\hat{\lambda}$ is perturbed. Given that $p_{\hat{\lambda}}$ is pinned at zero on the left boundary, the setting is reminiscent of a shooting problem, where we would be analysing how changing $\hat{\lambda}$ affects the path of our solution starting at $p_{\hat{\lambda}}(a)=0$.
+
+We now wish to solve for $p^{(1)}$ through its implicit eigenvalue problem defined as such,
+\begin{equation*}
+    \mathcal{L}_{F}\,p_{\hat{\lambda}} = \hat{\lambda} p_{\hat{\lambda}}.
+\end{equation*}
+By the definition of $p_{\hat{\lambda}}$ we have,
+\begin{equation*}
+     \mathcal{L}_{F}\,p^{(0)} + \hat{\lambda}\mathcal{L}_{F}\, p^{(1)} = \hat{\lambda}\left(p^{(0)} + \hat{\lambda} p^{(1)}\right).
+\end{equation*}
+By definition of $p^{(0)}$ and the fact that we are perturbing about $\hat{\lambda}=0$, we arrive at,
+\begin{equation*}
+    \mathcal{L}_{F}\,p^{(1)} =  p^{(0)}
+\end{equation*}
+That is to say, we wish to solve for $p^{(1)}$ in the following equation,
+\begin{equation*}
+    D\frac{\partial^2 p^{(1)}}{\partial x^2} + \frac{\partial}{\partial x}[U_x(x)p^{(1)}] =  p^{(0)}.
+\end{equation*}
+% \begin{align}
+%     \mathcal{L}p^{(1)} &=  p^{(0)} + \hat{\lambda} p^{(1)} &&\text{(by \cref{eq:eigenfunction one BC})} \notag \\
+%     \mathcal{L}p^{(1)} &=  p^{(0)} &&\text{(perturbation about $\hat{\lambda}=0$)} \notag \\
+%     D\frac{\partial^2 p^{(1)}}{\partial x^2} + \frac{\partial}{\partial x}[U_x(x)p^{(1)}] &=  p^{(0)} && \text{(definition of $\mathcal{L}_{F}$)}\notag
+% \end{align}
+Let $P^{(0)}(x) \coloneq \int_{a}^x p^{(0)}(s) ds$. Applying the integrating factor $e^{U(x)/D}$, integrating twice and applying the boundary and normalisation conditions in \cref{eq:BCs p1 linearisation} gives the following solution in terms of integration constant $c_1$,
+\begin{equation*}
+    p^{(1)}(x) = \frac{1}{D}\int_{a}^x \exp\left(\frac{U(s)-U(x)}{D} \right) (P^{(0)}(s) + c_1) \, ds,
+\end{equation*}
+with constant $c_1$ given by,
+\begin{equation*}
+    c_1 = \frac{-\int_{a}^{b}\int_{a}^{s_2} \exp\left(\frac{U(s_1)-U(s_2)}{D} \right) P^{(0)}(s_1) \, ds_1 \, ds_2}{\int_{a}^{b}\int_{a}^{s_2} \exp\left(\frac{U(s_1)-U(s_2)}{D} \right) \, ds_1 \, ds_2}.
+\end{equation*}
+We now have expressions for $p^{(0)}$ and $p^{(1)}$, giving a complete picture of \cref{eq:linear pertubation definition} with the free perturbation parameter $\hat{\lambda}$. The value of $\hat{\lambda}$ is determined by our choice of boundary condition at $x=b$, which until this point we have left undefined. We now explore values of $\hat{\lambda}$ which satisfy an absorbing or a homogeneous Neumann boundary condition at $x=b$.
+
+\subsubsection*{Correction to absorbing boundary condition}
+Let us introduce an absorbing boundary condition $p_{\hat{\lambda}}(b)=0$ to the perturbation approximation. Solving for the eigenvalue perturbation parameter $\hat{\lambda}$ in \cref{eq:linear pertubation definition} gives
+\begin{equation}
+    \label{eq:BC pert method absorbing bc lambda}
+    \hat{\lambda} = -\frac{p^{(0)}(b)}{p^{(1)}(b)}.
+\end{equation}
+The corresponding perturbed solution $\hat{\psi}$ is given by
+\begin{equation}
+    \label{eq:BC pert method absorbing bc psi}
+    \hat{\psi}(x) = p^{(0)}(x)-\frac{p^{(0)}(b)}{p^{(1)}(b)}p^{(1)}(x).
+\end{equation}
+Therefore, at $\hat{\lambda} = -\frac{p^{(0)}(b)}{p^{(1)}(b)}$ we have the approximated solution $\hat{\psi}$ of the eigenvalue problem $\mathcal{L}_{F}\,\hat{\psi} =  \hat{\lambda} \,\hat{\psi}$, satisfying two boundary conditions and normalisation conditions. See \cref{fig:BCpertExampleAsym} for an example of such an approximation being applied.
+ That is, we have approximated solutions \cref{eq:BC pert method absorbing bc lambda,eq:BC pert method absorbing bc psi} to the leading eigenvalue and eigenfunction of,
+\begin{equation}
+\label{eq:BC pert method absorbing bc conditions}
+\left\{
+\begin{aligned}
+\mathcal{L}_{F}\, \psi &= \lambda\psi , \qquad x \in [a, b], \\
+\psi(a) &= 0, \\
+\psi(b) &= 0, \\
+\int_a^b\psi \, dx &= 1.
+\end{aligned}
+\right.
+\end{equation}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics{figures/BCpertExampleAsym.pdf}
+    \caption[BCPM approximation applied to an asymmetric potential function.]{(a) An asymmetric potential function and (b) the corresponding BCPM approximation.}
+    \label{fig:BCpertExampleAsym}
+\end{figure}
+
+\subsubsection*{Correction to homogeneous Neumann boundary condition}
+If we wish to perturb our solution such that we have a homogeneous Neumann boundary condition at $x=b$ then a simple alteration is required from the method above. We wish to introduce the boundary condition $ \frac{dp_{\hat{\lambda}}}{dx} = 0$ at $x=b$. Solving \cref{eq:linear pertubation definition} gives,
+\begin{equation}
+    \label{eq:BC pert method neumann bc lambda}
+    \hat{\lambda} = -\frac{p^{(0)}_x(b)}{p^{(1)}_x(b)},
+\end{equation}
+with the corresponding perturbed solution $\hat{\psi}$ given by,
+\begin{equation}
+    \label{eq:BC pert method neumann bc psi}
+    \hat{\psi}(x) = p^{(0)}(x)-\frac{p^{(0)}_x(b)}{p^{(1)}_x(b)}p^{(1)}(x),
+\end{equation}
+where $p^{(0)}_x=\frac{dp^{(0)}}{dx}$ and $p^{(1)}_x=\frac{dp^{(1)}}{dx}$.
+However, as of yet, we have not computed the derivatives of $p^{(0)}$ or $p^{(1)}$. We can do so, giving the following,
+\begin{equation*}
+    \frac{dp^{(0)}}{dx} = c_0 - \frac{U_x(x)p^{(0)}(x)}{D},
+\end{equation*}
+and
+
+\begin{equation*}
+    \frac{dp^{(1)}}{dx} = \frac{c_1+P^{(0)}(x)-U_x(x)p^{(1)}(x)}{D},
+\end{equation*}
+where $c_0$, $c_1$ and $P^{(0)}(x)$ are defined as previously mentioned. Therefore we have an approximated solution \cref{eq:BC pert method neumann bc lambda,eq:BC pert method neumann bc psi} to the leading eigenvalue and eigenfunction of,
+\begin{equation}
+\label{eq:BC pert method neumann bc conditions}
+\left\{
+\begin{aligned}
+\mathcal{L}_{F}\, \psi &= \lambda\psi , \qquad x \in [a, b], \\
+\psi(a) &= 0, \\
+\left.\frac{d\psi}{dx}\right|_{x=b} &= 0, \\
+\int_a^b\psi \, dx &= 1.
+\end{aligned}
+\right.
+\end{equation}
+
+\subsubsection*{Applying Neumann boundary condition to even anti-confining potential function}
+If we restrict the potential function $U(x)$ to even functions then one can gain additional approximations. Consider the FPO $\mathcal{L}_{F}$ with the the even anti-confining potential function $U(x)$ (that is $U(x) \to -\infty$ as $|x|\to \infty$) restricted to the domain $x\in[-\delta,\delta]$ with two absorbing boundary conditions. Assuming that $U$ has a single, deep basin of attraction, by the even property of $U$, the stable equilibrium is $x^*=0$. The standard application the BCPM, as presented above, fails in the case that $U(x) \to -\infty$ as $|x|\to \infty$ as we require an initially undefined boundary condition from which probability flux can enter the system at one boundary and exit at the other in a steady state manner. Therefore an alternative method is required.
+
+As $U(x)$ is even, it follows that $\mathcal{L}_{F}$ commutes with the reflection operator $Rf(x) \coloneq f(-x)$. Therefore, if $\mathcal{L}_{F}$ has the eigenvalue $\lambda_n$ with the corresponding eigenfunction $\psi_n(x)$, then $\psi_n(-x)$ must also be an eigenfunction of $\mathcal{L}_{F}$ (also corresponding to $\lambda_n$). Eigenfunctions for a given eigenvalue (in regular Sturm-Liouville problems) are unique up to a scalar multiple. Therefore $\psi_n(x)=c_n\psi_n(-x)$ for some scalar $c_n$. This can only hold for $c_n = \pm1$, making $\psi_n(x)$ either even or odd. Therefore we conclude that if $U(x)$ is an even function, then every eigenfunction of $\mathcal{L}_{F}$ is either even or odd.
+
+By the Sturm oscillation theorem, $\psi_n$ has $n$ zeros in the open interval $(-\delta, \delta)$. An even function must have an even number of zeros, and an odd function must have an odd number of zeros. Therefore, if $n$ is even, then $\psi_n$ is even, and if $n$ is odd, then $\psi_n$ is odd. Therefore we can state the following,
+\begin{equation}
+    \label{eq:evenness of even eigenfunction}
+    \psi_{2k}(x) = \psi_{2k}(-x),
+\end{equation}
+and
+\begin{equation}
+    \label{eq:oddness of odd eigenfunction}
+    \psi_{2k+1}(x) = -\psi_{2k+1}(-x),
+\end{equation}
+for $k = 0, 1,2,\dots$ where $U(x)$ is an even potential function. At the origin, by the properties of even and odd functions, the following is also true,
+\begin{equation}
+    \label{eq:even function origin condition}
+    \left.\frac{d\psi_{2k}}{dx}\right|_{x=0} = 0,
+\end{equation}
+and
+\begin{equation}
+    \label{eq:odd function origin condition}
+    \psi_{2k+1}(0) = 0,
+\end{equation}
+for $k=0,1,2,\dots$.
+
+For some even potential function $U(x)$, the leading eigenfunction $\psi_0$ of $\mathcal{L}_{F}$ is therefore even with the condition $\left.\frac{d\psi_{0}}{dx}\right|_{x=0} = 0$. That is, we wish to solve the eigenvalue problem given by,
+\begin{equation}
+%\label{eq:BC pert method neumann bc conditions}
+\left\{
+\begin{aligned}
+\mathcal{L}_{F}\, \psi &= \lambda\psi , \qquad x \in [-\delta, 0], \\
+\psi(-\delta) &= 0, \\
+\left.\frac{d\psi}{dx}\right|_{x=0} &= 0, \\
+\int_{-\delta}^0\psi \, dx &= 1.
+\end{aligned}
+\right.
+\end{equation}
+These are exactly the conditions presented in \cref{eq:BC pert method neumann bc conditions} for the BCPM with a correction to the homogeneous Neumann boundary condition. We can therefore apply \cref{eq:BC pert method neumann bc lambda,eq:BC pert method neumann bc psi} to the half domain of $[-\delta,0]$ to find the approximated leading non-zero eigenvalue $\hat{\lambda}$ and eigenfunction $\hat{\psi}$. The half domain approximated eigenfunction given by \cref{eq:BC pert method neumann bc psi} can naturally be extended to the full domain by the evenness property of $\psi_0$. The eigenvalues on the half and full domain are equal. See \cref{fig:BCpertExampleSymInv} for the application of such an implementation of the BCPM.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics{figures/BCpertExampleSymInv.pdf}
+    \caption[BCPM approximation for an even anti-confining potential function.]{(a) An even anti-confining potential function, with the relevant half domain shaded darker and (b) the corresponding BCPM approximation applied to the half domain (shaded darker).}
+    \label{fig:BCpertExampleSymInv}
+\end{figure}
+
+\subsubsection*{Applying Neumann boundary condition to even confining potential functions}
+Consider the same FPO $\mathcal{L}_{F}$ with the the even anti-confining potential function $U(x)$ on the domain $x\in[-\delta,\delta]$ with two absorbing boundary conditions, as discussed in the section immediately prior. We established the approximations $\hat{\lambda}$ and $\hat{\psi}$ given by \cref{eq:BC pert method neumann bc lambda,eq:BC pert method neumann bc psi} can be applied. To make it clear that these approximations correspond to the leading eigenvalue and eigenfunction of $\mathcal{L}_{F}$, let $\hat{\lambda}_0=\hat{\lambda}$ and $\hat{\psi}_0=\hat{\psi}$. Given our approximations of $\mathcal{L}_{F}$, let us now consider the FPO $\overline{\mathcal{L}}_{F}$ with the inverted even potential function $\overline{U}(x) = -U(x)$ (which is therefore an even confining potential function). By \cref{eq:invert BC} the corresponding boundary conditions for the inverted operator are two reflecting boundary conditions (i.e. two zero-flux boundary conditions) at $x=-\delta$ and $x=\delta$. Let $\overline{\mathcal{L}}_{F}$ have eigenvalues $\{\overline{\lambda}_0,\overline{\lambda}_1,\dots\}$ and eigenfunctions $\{\overline{\psi}_0,\overline{\psi}_1,\dots\}$.
+
+Note that as $\overline{\mathcal{L}}_{F}$ has a two reflecting boundary conditions, the leading eigenvalue is $\overline{\lambda}_0=0$, the zero-eigenvalue. Therefore the leading non-zero eigenvalue is $\overline{\lambda}_1$. As stated in \cref{eq:intert eigenvalue abs to reflec}, we can relate eigenvalues of inverted potential functions as such,
+\begin{equation}
+    \label{eq:BC pert method eigenvalue transformation}
+   \overline{\lambda}_1=\lambda_0.
+\end{equation}
+Therefore, the leading non-zero eigenvalue $\overline{\lambda}_1$ is approximated using the BCPM on the half domain $[-\delta,0]$ with potential function $U(x)$, i.e. approximated by $\hat{\lambda}_0$. The leading non-zero eigenfunction $\overline{\psi}_1$ of $\overline{\mathcal{L}}_{F}$ can also be approximated from the transformation of $\hat{\psi}_0$, as presented in \cref{eq:intert eigenvalue abs to reflec}. However it is possible to compute an approximation of $\overline{\psi}_1$ directly within the BCPM framework, without the mentioned transformation, we shown this approach now.
+
+As mentioned by \cref{eq:oddness of odd eigenfunction}, $\overline{\psi}_1$ is an odd function. By \cref{eq:odd function origin condition} we know $\overline{\psi}_1(0)=0$. Let us once again consider the half domain, $x\in[0,\delta]$. Note that we use the positive half domain in this case where as the previous example used the negative half domain. The reason for the choice is simply to allow \cref{eq:linear pertubation definition} to be applied directly in its present form as it choose the left boundary condition to satisfy $\overline{\psi}_1(0)=0$ (a $x$ to $-x$ variable change would allow the negative half domain to be used if desired). Therefore we wish to approximate the following system,
+\begin{equation}
+\left\{
+\begin{aligned}
+\overline{\mathcal{L}}_{F}\, \overline{\psi} = \overline{\lambda} \,\overline{\psi} &, \qquad x \in [0, \delta], \\
+\overline{\psi}(0) = 0&, \\
+J(\delta) = 0&, \\
+\int_0^{\delta}\overline{\psi} \, dx = 1&,
+\end{aligned}
+\right.
+\end{equation}
+where $J=-D\frac{d\overline{\psi}}{dx} -\frac{dU}{dx}\overline{\psi}$ is the probability flux associated with $\overline{\psi}$. We may begin our approximation in similar way to previous examples, with \cref{eq:linear pertubation definition} giving,
+\begin{equation*}
+    \overline{p}_{\hat{\lambda}}(x) = \overline{p}^{(0)}(x) + \hat{\lambda} \overline{p}^{(0)}(x),
+\end{equation*}
+which satisfies the left absorbing boundary condition and the behaviour at the right boundary condition is dependent on $\hat{\lambda}$. In previous cases we were able to cleanly solve for the value of the eigenvalue perturbation parameter $\hat{\lambda}$ by enforcing a second boundary condition. Here, our second boundary condition is not so clean (a flux condition, rather than a homogeneous Dirichlet or Neumann condition), causing complexities of our expressions to grow quickly. However, by \cref{eq:BC pert method eigenvalue transformation} we already know an approximation of $\lambda$ from the anti-confining potential function case, therefore,
+\begin{equation*}
+    \hat{\overline{\lambda}}_1 =\hat{\lambda}_0 = -\frac{p_x^{(0)}(0)}{p_x^{(1)}(0)},
+\end{equation*}
+where $p_x^{(0)}$ and $p^{(1)}_x(0)$ are the derivatives of correction functions from the even anti-confining potential function case (on the half domain). Therefore our approximation of leading non-zero eigenfunction $\hat{\overline{\psi}}_1(x)$ of $\overline{\mathcal{L}}_{F}$  is given by,
+\begin{equation*}
+    \hat{\overline{\psi}}_1(x) = \overline{p}_{\hat{\lambda}}(x) = \overline{p}^{(0)}(x) -\frac{p_x^{(0)}(0)}{p_x^{(1)}(0)} \overline{p}^{(0)}(x).
+\end{equation*}
+Once again, the eigenfunction approximation may be extended to the full domain by the oddness property of $\psi_1$. See \cref{fig:BCpertExampleSym} for the application of such an implementation of the BCPM.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics{figures/BCpertExampleSym.pdf}
+    \caption[BCPM approximation for an even confining potential function.]{(a) A bistable even confining potential function, with the relevant half domain shaded darker and (b) the corresponding BCPM approximation applied to the half domain (shaded darker).}
+    \label{fig:BCpertExampleSym}
+\end{figure}
+
+\section{Rayleigh–Schrödinger perturbation method}
+\label{sec:RS perturbation}
+We now present the \emph{Rayleigh-Schrödinger perturbation method} (RSPM), a method widely used in quantum mechanics to approximate the eigenvalues and eigenfunctions of a differential operator given that a `similar' self-adjoint operator has a known set of eigenvalues and eigenfunctions. Typically, the RSPM is applied to the Schrödinger operator. General notes for the RSPM are adapted from Bender and Orszag \cite{bender_orsag_1999_advanced_mathematical_methods} and then applied to the FPO. We also adapt the recursive formulation of the RSPM to allow for a more computationally efficient implementation to be applied in practice.
+
+Let us decomposed the FPO $\mathcal{L}_{F}$ into a self-adjoint operator $\mathcal{L}_0$ with a know set of eigenvalues and eigenfunctions and another operator $\mathcal{L}_1$,
+\begin{equation}
+    \label{eq:high noise perturbation}
+    \mathcal{L}_{F} = \mathcal{L}_0+\mathcal{L}_1.
+\end{equation}
+Let $\mathcal{L}_0$ be self-adjoint with respect to the inner-product $\langle\cdot,\cdot\rangle$. Let us write the decomposition of $\mathcal{L}_{F}$ presented in \cref{eq:high noise perturbation} as a perturbation about $\mathcal{L}_0$ with perturbation parameter $\eta$ as such,
+\begin{equation}
+    \label{eq:RS operator pert}
+    \mathcal{L}_{\eta} = \mathcal{L}_0 + \eta \mathcal{L}_1.
+\end{equation}
+We write the eigenvalues and eigenfunctions of $\mathcal{L}_{\eta}$ as $\{\lambda_0(\eta), \lambda_1(\eta), \dots\}$ and $\{\psi_0(x,\eta),\psi_1(x,\eta),\dots\}$, respectively. The eigenvalues and eigenfunctions of $\mathcal{L}_0$ are $\{\lambda_0^{(0)},\lambda_1^{(0)},\dots\}$ and $\{\psi_0^{(0)}(x), \psi_1^{(0)}(x), \dots\}$, respectively. We assume that the eigenfunctions $\{\psi_0^{(0)}(x), \psi_1^{(0)}(x), \dots\}$ form an orthonormal basis of our given Hilbert space. Each $\lambda_n(\eta)$ and $\psi_n(x,\eta)$ can be written as a perturbation as such,
+\begin{equation}
+    \label{eq:RS eigenvalue pert series}
+    \lambda_n(\eta) = \lambda_n^{(0)} + \eta\lambda_n^{(1)} + \eta^2\lambda_n^{(2)}+ \dots,
+\end{equation}
+\begin{equation}
+    \label{eq:RS eigenfunction pert series}
+    \psi_n(\eta,x) = \psi_n^{(0)}(x) + \eta\psi_n^{(1)}(x) + \eta^2\psi_n^{(2)}(x)+ \dots.
+\end{equation}
+We call $\lambda_n^{(m)}$ and $\psi_n^{(m)}(x)$ the $m$th order correction to the $n$th eigenvalue and eigenfunction, respectively. We wish to solve for correction terms in \cref{eq:RS eigenvalue pert series,eq:RS eigenfunction pert series} such that $\lambda_n(\eta)$ and $\psi_n(x,\eta)$ satisfy the eigenvalue equation of $\mathcal{L}_{\eta}$,
+\begin{equation*}
+    \mathcal{L}_{\eta} \psi_n(x,\eta) = \lambda_n(\eta)\psi_n(x,\eta).
+\end{equation*}
+Substituting \cref{eq:RS operator pert,eq:RS eigenvalue pert series,eq:RS eigenfunction pert series},
+\begin{equation*}
+    (\mathcal{L}_0 + \eta \mathcal{L}_1)[\psi_n^{(0)} + \eta\psi_n^{(1)}  + \eta^2\psi_n^{(2)} + \dotsc] = (\lambda_n^{(0)} + \eta\lambda_n^{(1)} + \eta^2\lambda_n^{(2)} + \dotsc)(\psi_n^{(0)} + \eta\psi_n^{(1)} + \eta^2\psi_n^{(2)} + \dotsc).
+\end{equation*}
+Expanding and grouping by orders of $\eta$,
+\begin{align}
+    \eta^0: \quad & \mathcal{L}_0\psi_n^{(0)} =  \lambda_n^{(0)}\psi_n^{(0)},\label{eq:RS order 0 correction}\\
+    \eta^1: \quad & (\mathcal{L}_0-\lambda_n^{(0)})\psi_n^{(1)} = -\mathcal{L}_1\psi_n^{(0)} +\lambda_n^{(1)}\psi_n^{(0)} \label{eq:RS order 1 correction}, \\
+    \eta^2: \quad & (\mathcal{L}_0-\lambda_n^{(0)})\psi_n^{(2)} = -\mathcal{L}_1\psi_n^{(1)} + \lambda_n^{(1)}\psi_n^{(1)}+ \lambda_n^{(2)}\psi_n^{(0)} \label{eq:RS order 2 correction} ,\\
+    \vdots \qquad \notag ,\\
+    \eta^m: \quad & (\mathcal{L}_0-\lambda_n^{(0)})\psi_n^{(m)} = -\mathcal{L}_1\psi_n^{(m-1)} + \sum_{i=1}^m \lambda_n^{(i)}\psi_n^{(m-i)}. \label{eq:RS order m correction}
+\end{align}
+By assumption, we take \cref{eq:RS order 0 correction} to be true with known solutions. Higher orders of $\eta$ are used to solve for correction terms. We can express the $m$th order corrections $\psi_n^{(m)}$ using the orthonormal basis $\{\psi_0^{(0)}, \psi_1^{(0)}, \psi_2^{(0)}, \dots\}$ with coefficients $\{a_{n,0}^{(m)}, a_{n,1}^{(m)}, a_{n,2}^{(m)},\dots \}$ as such,
+\begin{equation}
+    \label{eq:RS basis of zero order eigenfunctions}
+    \psi_n^{(m)} = \sum_{i} a_{n,i}^{(m)}\psi_i^{(0)}
+\end{equation}
+This expression of higher order corrections will be used extensively throughout the following derivations. Solutions for the first-order and second-order corrections found in \cref{eq:RS order 1 correction,eq:RS order 2 correction} will now be presented, followed by a general solution for the $m$th order corrections.
+\subsubsection*{First order corrections}
+Substituting \cref{eq:RS basis of zero order eigenfunctions} into \cref{eq:RS order 1 correction} and utilising linearity and \cref{eq:RS order 0 correction},
+\begin{equation*}
+    \sum_{i} a_{n,i}^{(1)}(\lambda_i^{(0)}-\lambda_n^{(0)})\psi_i^{(0)} = -\mathcal{L}_1\psi_n^{(0)}+\lambda_n^{(1)}\psi_n^{(0)}.
+\end{equation*}
+Applying $\langle \psi_j^{(0)}, \cdot \rangle$,
+\begin{equation}
+    \label{eq:RS order 1 sum of inner products}
+    \sum_{i} a_{n,i}^{(1)}(\lambda_i^{(0)}-\lambda_n^{(0)})\langle \psi_j^{(0)}, \psi_i^{(0)} \rangle = -\langle \psi_j^{(0)}, \mathcal{L}_1\psi_n^{(0)} \rangle + \lambda_n^{(1)} \langle \psi_j^{(0)}, \psi_n^{(0)} \rangle.
+\end{equation}
+\paragraph{Case $j=n$.} As $\psi_n^{(0)}$ and $\psi_i^{(0)}$ are orthonormal for $n\neq i$ we can drop all terms in the summation on the LHS of \cref{eq:RS order 1 sum of inner products} except for $n=i$. However, when $n=i$ the term in the summation is equal to zero due to $\lambda_i^{(0)}-\lambda_n^{(0)}$.  Thus in the case $j=n$, \cref{eq:RS order 1 sum of inner products} yields the first order eigenvalue correction,
+\begin{equation}
+    \label{eq:RS first order eigenvalue correction}
+    \lambda_n^{(1)} = \langle \psi_n^{(0)}, \mathcal{L}_1\psi_n^{(0)} \rangle 
+\end{equation}
+\paragraph{Case $j\neq n$.} Once again, by orthogonality, several terms drop out of \cref{eq:RS order 1 sum of inner products}. The only term left in the summation on the LHS of \cref{eq:RS order 1 sum of inner products} is from $i = j$, leaving $(\lambda_j^{(0)}-\lambda_n^{(0)})a_{n,j}^{(1)}$. Rearranging gives,
+\begin{equation*}
+    a_{n,j}^{(1)} =  \frac{-\langle \psi_j^{(0)}, \mathcal{L}_1\psi_n^{(0)} \rangle}{\lambda_j^{(0)}-\lambda_n^{(0)}}, \qquad j\neq n.
+\end{equation*}
+Note that $a_{n,n}^{(m)}$ is equal to zero as for all $n$ and $m$ (a process called the \emph{intermediate normalisation} in some literature). We can think of this as perturbing away from $\psi_n^{(0)}$ for all $n$, hence there is no contribution from $\psi_n^{(0)}$ when expressing each correction term (hence $a_{n,n}^{(m)}=0$). Substituting into \cref{eq:RS basis of zero order eigenfunctions} yields the first order eigenfunction correction,
+\begin{equation}
+    \label{eq:RS first order eigenfunction correction}
+    \psi_n^{(1)} = \sum_{i\neq n} \frac{-\langle \psi_i^{(0)}, \mathcal{L}_1\psi_n^{(0)} \rangle}{\lambda_i^{(0)}-\lambda_n^{(0)}}\psi_i^{(0)}.
+\end{equation}
+
+\subsubsection*{Second order corrections}
+Let us apply a similar treatment to \cref{eq:RS order 2 correction} to yield the second order corrections. Substituting \cref{eq:RS basis of zero order eigenfunctions} into \cref{eq:RS order 2 correction},
+\begin{equation*}
+    \sum_{i} a_{n,i}^{(2)}(\lambda_i^{(0)}-\lambda_n^{(0)})\psi_i^{(0)} = -\mathcal{L}_1\psi_n^{(1)} +\lambda_n^{(1)}\psi_n^{(1)}+ \lambda_n^{(2)}\psi_n^{(0)}.
+\end{equation*}
+Applying $\langle \psi_j^{(0)}, \cdot \rangle$,
+\begin{equation*}
+    \sum_{i} a_{n,i}^{(2)}(\lambda_i^{(0)}-\lambda_n^{(0)})\langle\psi_j^{(0)},\psi_i^{(0)}\rangle = -\langle\psi_j^{(0)},\mathcal{L}_1\psi_n^{(1)}\rangle + \lambda_n^{(1)} \langle\psi_j^{(0)},\psi_n^{(1)}\rangle + \lambda_n^{(2)}\langle\psi_j^{(0)},\psi_n^{(0)}\rangle.
+\end{equation*}
+\paragraph{Case $j=n$.}
+Applying the same orthogonality practices as the first order correction as well as utilising the orthogonality of $\psi_n^{(0)}$ and $\psi_n^{(m)}$ for all $m\geq1$.
+\begin{equation*}
+    \lambda_n^{(2)} = \langle\psi_n^{(0)},\mathcal{L}_1\psi_n^{(1)}\rangle.
+\end{equation*}
+\paragraph{Case $j\neq n$.} Following same logic as the first order correction,
+\begin{equation*}
+     a_{n,j}^{(2)} =  \frac{-\langle\psi_j^{(0)},\mathcal{L}_1\psi_n^{(1)}\rangle + \lambda_n^{(1)} \langle\psi_j^{(0)},\psi_n^{(1)}\rangle}{\lambda_j^{(0)}-\lambda_n^{(0)}} , \qquad j\neq n.
+\end{equation*}
+Substituting into \cref{eq:RS basis of zero order eigenfunctions},
+\begin{equation}
+    \psi_n^{(2)} = \sum_{i\neq n} \frac{-\langle\psi_i^{(0)},\mathcal{L}_1\psi_n^{(1)}\rangle + \lambda_n^{(1)} \langle\psi_i^{(0)},\psi_n^{(1)}\rangle}{\lambda_i^{(0)}-\lambda_n^{(0)}}\psi_i^{(0)}.
+\end{equation}
+
+\subsubsection*{General higher order corrections}
+Let us work more generally and find expressions for the $m$th order corrections $\lambda_n^{(m)}$ and $\psi_n^{(m)}$ found in \cref{eq:RS order m correction}. The logic is  almost identical to that used to find the first and second order corrections. We begin by substituting \cref{eq:RS basis of zero order eigenfunctions} into \cref{eq:RS order m correction} and applying linearity,
+\begin{equation*}
+    \sum_{i} a_{n,i}^{(m)}(\lambda_i^{(0)}-\lambda_n^{(0)})\psi_i^{(0)} = -\mathcal{L}_1\psi_n^{(m-1)} + \sum_{i=1}^m \lambda_n^{(i)}\psi_n^{(m-i)}.
+\end{equation*}
+Applying $\langle\psi_j^{(0)},\cdot\rangle$,
+\begin{equation*}
+    \sum_{i} a_{n,i}^{(m)}(\lambda_i^{(0)}-\lambda_n^{(0)})\langle\psi_j^{(0)},\psi_i^{(0)}\rangle = - \langle\psi_j^{(0)},\mathcal{L}_1\psi_n^{(m-1)}\rangle  + \sum_{i=1}^m \lambda_n^{(i)} \langle\psi_j^{(0)},\psi_n^{(m-i)}\rangle .
+\end{equation*}
+\paragraph{Case $j= n$.} Apply normal orthogonality tricks on the LHS and apply the orthogonality of $\psi_n^{(0)}$ and $\psi_n^{(m)}$ for all $m\geq1$ on the RHS, reducing the summation to simply $\lambda_n^{(m)}$.
+\begin{equation*}
+    \lambda_n^{(m)} = \langle\psi_n^{(0)},\mathcal{L}_1\psi_n^{(m-1)}\rangle .
+\end{equation*}
+This is a clean, general expression for the $m$th order eigenvalue corrections. However, when actually computing this inner-product it may be more useful to write in terms of the known basis $\{\psi_0^{(0)}, \psi_1^{(0)}, \dots\}$ by substituting \cref{eq:RS basis of zero order eigenfunctions} and utilising linearity as such,
+\begin{equation*}
+    \lambda_n^{(m)} = \sum_{i} a_{n,i}^{(m-1)}\langle\psi_n^{(0)},\mathcal{L}_1 \psi_i^{(0)} \rangle .
+\end{equation*}
+\paragraph{Case $j\neq n$.} Once again, orthogonality leaves $a_{n,j}^{(m)}(\lambda_j^{(0)}-\lambda_n^{(0)})$ on the LHS. The summation on the RHS remains unchanged apart from the term corresponding to $i=m$ which is removed by orthogonality, causing the summation to terminate at $i=m-1$ (rather than $i=m$ as before).
+\begin{equation}
+\label{eq:RS a_coef general}
+     a_{n,j}^{(m)} = \frac{ - \langle\psi_j^{(0)},\mathcal{L}_1\psi_n^{(m-1)}\rangle  + \sum_{i=1}^{m-1} \lambda_n^{(i)} \langle\psi_j^{(0)},\psi_n^{(m-i)}\rangle }{\lambda_j^{(0)}-\lambda_n^{(0)}}.
+\end{equation}
+Once again, we could simply substitute \cref{eq:RS a_coef general} into \cref{eq:RS basis of zero order eigenfunctions} and we would have an acceptable expression for $\psi_n{(m)}$ however we wish to express the corrections in terms of the known basis $\{\psi_0^{(0)}, \psi_1^{(0)}, \dots\}$. Let us consider each term of \cref{eq:RS a_coef general} written in terms of $\{\psi_0^{(0)}, \psi_1^{(0)}, \dots\}$ and simplify. Firstly,
+\begin{align}
+    \langle\psi_j^{(0)},\mathcal{L}_1\psi_n^{(m-1)}\rangle &= \langle\psi_j^{(0)},\mathcal{L}_1 \left[ \sum_{i} a_{n,i}^{(m-1)}\psi_i^{(0)} \right]\rangle \notag,\\
+    & = \sum_{i} a_{n,i}^{(m-1)}\langle\psi_j^{(0)},\mathcal{L}_1 \psi_i^{(0)}\rangle \label{eq:RS a_coef general term a}.
+\end{align}
+Next,
+\begin{align}
+    \sum_{i=1}^{m-1} \lambda_n^{(i)} \langle\psi_j^{(0)},\psi_n^{(m-i)}\rangle  & = \sum_{i=1}^{m-1} \lambda_n^{(i)} \langle\psi_j^{(0)},\sum_{k} a_{n,k}^{(m-i)}\psi_k^{(0)}\rangle \notag, \\
+    & =\sum_{i=1}^{m-1} \lambda_n^{(i)}\sum_{k} a_{n,k}^{(m-i)} \langle\psi_j^{(0)},\psi_k^{(0)}\rangle \notag, \\
+    & =\sum_{i=1}^{m-1}a_{n,j}^{(m-i)}  \lambda_n^{(i)}  . \label{eq:RS a_coef general term b}
+\end{align}
+Substituting \cref{eq:RS a_coef general term a,eq:RS a_coef general term b} into \cref{eq:RS a_coef general} gives $a_{n,j}^{(m)}$ in terms of the known basis $\{\psi_0^{(0)}, \psi_1^{(0)}, \dots\}$ as such,
+\begin{equation*}
+     a_{n,j}^{(m)} = \frac{ - \sum_{i} a_{n,i}^{(m-1)}\langle\psi_j^{(0)},\mathcal{L}_1 \psi_i^{(0)}\rangle  + \sum_{i=1}^{m-1}  a_{n,j}^{(m-i)} \lambda_n^{(i)}}{\lambda_j^{(0)}-\lambda_n^{(0)}}.
+\end{equation*}
+Therefore, any order of correction of the RSPM can be expressed in terms of the known basis $\{\psi_0^{(0)}, \psi_1^{(0)}, \dots\}$.
+
   \section{Results}
   \section{Discussion}
   \section{Conclusion}
