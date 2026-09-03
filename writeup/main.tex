@@ -373,11 +373,7 @@ We call $\lambda_n^{(m)}$ and $\psi_n^{(m)}(x)$ the $m$th order correction to th
 \begin{equation*}
     \mathcal{L}_{\eta} \psi_n(x,\eta) = \lambda_n(\eta)\psi_n(x,\eta).
 \end{equation*}
-Substituting \cref{eq:RS operator pert,eq:RS eigenvalue pert series,eq:RS eigenfunction pert series},
-\begin{equation*}
-    (\mathcal{L}_0 + \eta \mathcal{L}_1)[\psi_n^{(0)} + \eta\psi_n^{(1)}  + \eta^2\psi_n^{(2)} + \dotsc] = (\lambda_n^{(0)} + \eta\lambda_n^{(1)} + \eta^2\lambda_n^{(2)} + \dotsc)(\psi_n^{(0)} + \eta\psi_n^{(1)} + \eta^2\psi_n^{(2)} + \dotsc).
-\end{equation*}
-Expanding and grouping by orders of $\eta$,
+Substituting \cref{eq:RS operator pert,eq:RS eigenvalue pert series,eq:RS eigenfunction pert series}, expanding and grouping by orders of $\eta$,
 \begin{align}
     \eta^0: \quad & \mathcal{L}_0\psi_n^{(0)} =  \lambda_n^{(0)}\psi_n^{(0)},\label{eq:RS order 0 correction}\\
     \eta^1: \quad & (\mathcal{L}_0-\lambda_n^{(0)})\psi_n^{(1)} = -\mathcal{L}_1\psi_n^{(0)} +\lambda_n^{(1)}\psi_n^{(0)} \label{eq:RS order 1 correction}, \\
@@ -391,53 +387,6 @@ By assumption, we take \cref{eq:RS order 0 correction} to be true with known sol
     \psi_n^{(m)} = \sum_{i} a_{n,i}^{(m)}\psi_i^{(0)}
 \end{equation}
 This expression of higher order corrections will be used extensively throughout the following derivations. Solutions for the first-order and second-order corrections found in \cref{eq:RS order 1 correction,eq:RS order 2 correction} will now be presented, followed by a general solution for the $m$th order corrections.
-\subsubsection*{First order corrections}
-Substituting \cref{eq:RS basis of zero order eigenfunctions} into \cref{eq:RS order 1 correction} and utilising linearity and \cref{eq:RS order 0 correction},
-\begin{equation*}
-    \sum_{i} a_{n,i}^{(1)}(\lambda_i^{(0)}-\lambda_n^{(0)})\psi_i^{(0)} = -\mathcal{L}_1\psi_n^{(0)}+\lambda_n^{(1)}\psi_n^{(0)}.
-\end{equation*}
-Applying $\langle \psi_j^{(0)}, \cdot \rangle$,
-\begin{equation}
-    \label{eq:RS order 1 sum of inner products}
-    \sum_{i} a_{n,i}^{(1)}(\lambda_i^{(0)}-\lambda_n^{(0)})\langle \psi_j^{(0)}, \psi_i^{(0)} \rangle = -\langle \psi_j^{(0)}, \mathcal{L}_1\psi_n^{(0)} \rangle + \lambda_n^{(1)} \langle \psi_j^{(0)}, \psi_n^{(0)} \rangle.
-\end{equation}
-\paragraph{Case $j=n$.} As $\psi_n^{(0)}$ and $\psi_i^{(0)}$ are orthonormal for $n\neq i$ we can drop all terms in the summation on the LHS of \cref{eq:RS order 1 sum of inner products} except for $n=i$. However, when $n=i$ the term in the summation is equal to zero due to $\lambda_i^{(0)}-\lambda_n^{(0)}$.  Thus in the case $j=n$, \cref{eq:RS order 1 sum of inner products} yields the first order eigenvalue correction,
-\begin{equation}
-    \label{eq:RS first order eigenvalue correction}
-    \lambda_n^{(1)} = \langle \psi_n^{(0)}, \mathcal{L}_1\psi_n^{(0)} \rangle 
-\end{equation}
-\paragraph{Case $j\neq n$.} Once again, by orthogonality, several terms drop out of \cref{eq:RS order 1 sum of inner products}. The only term left in the summation on the LHS of \cref{eq:RS order 1 sum of inner products} is from $i = j$, leaving $(\lambda_j^{(0)}-\lambda_n^{(0)})a_{n,j}^{(1)}$. Rearranging gives,
-\begin{equation*}
-    a_{n,j}^{(1)} =  \frac{-\langle \psi_j^{(0)}, \mathcal{L}_1\psi_n^{(0)} \rangle}{\lambda_j^{(0)}-\lambda_n^{(0)}}, \qquad j\neq n.
-\end{equation*}
-Note that $a_{n,n}^{(m)}$ is equal to zero as for all $n$ and $m$ (a process called the \emph{intermediate normalisation} in some literature). We can think of this as perturbing away from $\psi_n^{(0)}$ for all $n$, hence there is no contribution from $\psi_n^{(0)}$ when expressing each correction term (hence $a_{n,n}^{(m)}=0$). Substituting into \cref{eq:RS basis of zero order eigenfunctions} yields the first order eigenfunction correction,
-\begin{equation}
-    \label{eq:RS first order eigenfunction correction}
-    \psi_n^{(1)} = \sum_{i\neq n} \frac{-\langle \psi_i^{(0)}, \mathcal{L}_1\psi_n^{(0)} \rangle}{\lambda_i^{(0)}-\lambda_n^{(0)}}\psi_i^{(0)}.
-\end{equation}
-
-\subsubsection*{Second order corrections}
-Let us apply a similar treatment to \cref{eq:RS order 2 correction} to yield the second order corrections. Substituting \cref{eq:RS basis of zero order eigenfunctions} into \cref{eq:RS order 2 correction},
-\begin{equation*}
-    \sum_{i} a_{n,i}^{(2)}(\lambda_i^{(0)}-\lambda_n^{(0)})\psi_i^{(0)} = -\mathcal{L}_1\psi_n^{(1)} +\lambda_n^{(1)}\psi_n^{(1)}+ \lambda_n^{(2)}\psi_n^{(0)}.
-\end{equation*}
-Applying $\langle \psi_j^{(0)}, \cdot \rangle$,
-\begin{equation*}
-    \sum_{i} a_{n,i}^{(2)}(\lambda_i^{(0)}-\lambda_n^{(0)})\langle\psi_j^{(0)},\psi_i^{(0)}\rangle = -\langle\psi_j^{(0)},\mathcal{L}_1\psi_n^{(1)}\rangle + \lambda_n^{(1)} \langle\psi_j^{(0)},\psi_n^{(1)}\rangle + \lambda_n^{(2)}\langle\psi_j^{(0)},\psi_n^{(0)}\rangle.
-\end{equation*}
-\paragraph{Case $j=n$.}
-Applying the same orthogonality practices as the first order correction as well as utilising the orthogonality of $\psi_n^{(0)}$ and $\psi_n^{(m)}$ for all $m\geq1$.
-\begin{equation*}
-    \lambda_n^{(2)} = \langle\psi_n^{(0)},\mathcal{L}_1\psi_n^{(1)}\rangle.
-\end{equation*}
-\paragraph{Case $j\neq n$.} Following same logic as the first order correction,
-\begin{equation*}
-     a_{n,j}^{(2)} =  \frac{-\langle\psi_j^{(0)},\mathcal{L}_1\psi_n^{(1)}\rangle + \lambda_n^{(1)} \langle\psi_j^{(0)},\psi_n^{(1)}\rangle}{\lambda_j^{(0)}-\lambda_n^{(0)}} , \qquad j\neq n.
-\end{equation*}
-Substituting into \cref{eq:RS basis of zero order eigenfunctions},
-\begin{equation}
-    \psi_n^{(2)} = \sum_{i\neq n} \frac{-\langle\psi_i^{(0)},\mathcal{L}_1\psi_n^{(1)}\rangle + \lambda_n^{(1)} \langle\psi_i^{(0)},\psi_n^{(1)}\rangle}{\lambda_i^{(0)}-\lambda_n^{(0)}}\psi_i^{(0)}.
-\end{equation}
 
 \subsubsection*{General higher order corrections}
 Let us work more generally and find expressions for the $m$th order corrections $\lambda_n^{(m)}$ and $\psi_n^{(m)}$ found in \cref{eq:RS order m correction}. The logic is  almost identical to that used to find the first and second order corrections. We begin by substituting \cref{eq:RS basis of zero order eigenfunctions} into \cref{eq:RS order m correction} and applying linearity,
