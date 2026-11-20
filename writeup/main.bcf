@@ -2362,25 +2362,25 @@
   </bcf:bibdata>
   <bcf:section number="0">
     <bcf:citekey order="1" intorder="1">rahmstorf_2024_AMOC</bcf:citekey>
-    <bcf:citekey order="2" intorder="1">vellinga_2002_global_climatic_impacts_of_AMOC</bcf:citekey>
-    <bcf:citekey order="3" intorder="1">broecker_1987_unpleasant_surprises_in_the_greenhouse</bcf:citekey>
-    <bcf:citekey order="3" intorder="2">rahmstorf_2002_ocean_circulation_past_120000_years</bcf:citekey>
-    <bcf:citekey order="4" intorder="1">van_western_2024_physics_based_EWS_AMOC</bcf:citekey>
-    <bcf:citekey order="5" intorder="1">staver_2011_savanna_forest_biome_states</bcf:citekey>
-    <bcf:citekey order="6" intorder="1">beddington_1977_harvesting_natural_populations</bcf:citekey>
-    <bcf:citekey order="7" intorder="1">scheffer_1993_alternative_lake_equilibria</bcf:citekey>
-    <bcf:citekey order="8" intorder="1">dakos_2019_ecosystem_tipping_points</bcf:citekey>
-    <bcf:citekey order="9" intorder="1">ashwin_2012_tipping_points</bcf:citekey>
-    <bcf:citekey order="10" intorder="1">ashwin_2012_tipping_points</bcf:citekey>
-    <bcf:citekey order="11" intorder="1">ritchie_sieber_2017_noise_rate_tipping</bcf:citekey>
-    <bcf:citekey order="12" intorder="1">risken_frank_1992_fokker_planck_equation</bcf:citekey>
+    <bcf:citekey order="1" intorder="2">vellinga_2002_global_climatic_impacts_of_AMOC</bcf:citekey>
+    <bcf:citekey order="1" intorder="3">van_western_2024_physics_based_EWS_AMOC</bcf:citekey>
+    <bcf:citekey order="2" intorder="1">staver_2011_savanna_forest_biome_states</bcf:citekey>
+    <bcf:citekey order="3" intorder="1">beddington_1977_harvesting_natural_populations</bcf:citekey>
+    <bcf:citekey order="4" intorder="1">scheffer_1993_alternative_lake_equilibria</bcf:citekey>
+    <bcf:citekey order="5" intorder="1">ashwin_2012_tipping_points</bcf:citekey>
+    <bcf:citekey order="6" intorder="1">ashwin_2012_tipping_points</bcf:citekey>
+    <bcf:citekey order="7" intorder="1">ritchie_sieber_2017_noise_rate_tipping</bcf:citekey>
+    <bcf:citekey order="8" intorder="1">risken_frank_1992_fokker_planck_equation</bcf:citekey>
+    <bcf:citekey order="9" intorder="1">ritchie_2016_early_warning</bcf:citekey>
+    <bcf:citekey order="9" intorder="2">ritchie_sieber_2017_noise_rate_tipping</bcf:citekey>
+    <bcf:citekey order="10" intorder="1">risken_frank_1992_fokker_planck_equation</bcf:citekey>
+    <bcf:citekey order="11" intorder="1">ritchie_2016_early_warning</bcf:citekey>
+    <bcf:citekey order="11" intorder="2">ritchie_sieber_2017_noise_rate_tipping</bcf:citekey>
+    <bcf:citekey order="12" intorder="1">ritchie_2016_early_warning</bcf:citekey>
+    <bcf:citekey order="12" intorder="2">ritchie_sieber_2017_noise_rate_tipping</bcf:citekey>
     <bcf:citekey order="13" intorder="1">ritchie_2016_early_warning</bcf:citekey>
     <bcf:citekey order="13" intorder="2">ritchie_sieber_2017_noise_rate_tipping</bcf:citekey>
-    <bcf:citekey order="14" intorder="1">ritchie_2016_early_warning</bcf:citekey>
-    <bcf:citekey order="14" intorder="2">ritchie_sieber_2017_noise_rate_tipping</bcf:citekey>
-    <bcf:citekey order="15" intorder="1">ritchie_2016_early_warning</bcf:citekey>
-    <bcf:citekey order="15" intorder="2">ritchie_sieber_2017_noise_rate_tipping</bcf:citekey>
-    <bcf:citekey order="16" intorder="1">bender_orsag_1999_advanced_mathematical_methods</bcf:citekey>
+    <bcf:citekey order="14" intorder="1">bender_orsag_1999_advanced_mathematical_methods</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="nty">
